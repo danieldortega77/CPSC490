@@ -22,3 +22,8 @@ message:    [ /print, 440 ]
 time:       760.7525028
 address:    a NetAddr(127.0.0.1, 55935)
 port:       57120
+
+log:
+
+2/19 Going through pygame tutorial (2 hours)
+https://www.youtube.com/watch?v=FfWpgLFMI7w
