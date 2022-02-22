@@ -6,27 +6,38 @@ from pygame.draw import *
 from enum import IntEnum
 from random import random, randrange, choice
 import time
+import pyOSC3
 
 pg.init()
 pg.mixer.init()
 
 ############################################ PROGRAM VARIABLES ################################################
 
-running = True
-mouse_down = False
-wall_place = False
-wall_remove = False
-to_restart = False
+client = pyOSC3.OSCClient()
+client.connect( ( '127.0.0.1', 57120 ) )
+# msg = pyOSC3.OSCMessage()
+# msg.setAddress("/test")
+# msg.append(440)
+# client.send(msg)
 
-dim = 800
+running = True
+to_restart = False
+# TODO: change draw modes to enum
+mouse_down = False
+
+class DrawMode(IntEnum):
+    none = 0
+    wall_place = 1
+    wall_remove = 2
+    start_move = 3
+    finish_move = 4
+
+draw_mode = DrawMode.none
+
+dim = 600
 n_tiles = 30
 tile_size = dim // n_tiles
 bg_color = colors['lightblue']
-
-up = 'music/up.mp3'
-down = 'music/down.mp3'
-left = 'music/left.mp3'
-right = 'music/right.mp3'
 
 screen = pg.display.set_mode((dim, dim))
 pg.display.set_caption('Pathfinding')
@@ -57,13 +68,13 @@ class Node:
         self.visited = False
         self.timeSinceVisited = 0
         self.parent = None
-        self.pitch = choice(pitches)
+        # self.pitch = choice(pitches)
+        self.pitch = pitches[i % len(pitches)]
 
         if random() < 0.2:
             self.state = NodeState.wall
 
         self.in_path = False
-        self.music = None
 
     def draw(self, screen):
         rect_color = colors['white']
@@ -108,11 +119,12 @@ class Node:
             return nb
 
         arr = [
-            [-1, 0, up],
-            [1, 0, down],
-            [0, 1, right],
-            [0, -1, left],
+            [-1, 0],
+            [1, 0],
+            [0, 1],
+            [0, -1],
 
+            # Uncomment to add diagonal neighbors
             # [-1, 1, up],
             # [1, 1, down],
             # [1, -1, right],
@@ -127,7 +139,6 @@ class Node:
                 t = grid[i][j]
                 if t.state != NodeState.wall and not t.visited:
                     t.parent = self
-                    t.music = pos[2]
 
                     nb.append(t)
 
@@ -149,13 +160,38 @@ def make_path(node):
         n = n.parent
 
 
-def play_music(music):
-    if music is None:
-        return
-
-    pg.mixer.music.load(music)
-    pg.mixer.music.play()
-    pg.mixer.music.set_volume(0.1)
+def play_music(pitch):
+    print(pitch)
+    msg = pyOSC3.OSCMessage()
+    msg.setAddress("/test")
+    if pitch == "C":
+        msg.append(350)
+    elif pitch == "C#":
+        msg.append(360)
+    elif pitch == "D":
+        msg.append(370)
+    elif pitch == "D#":
+        msg.append(380)
+    elif pitch == "E":
+        msg.append(390)
+    elif pitch == "F":
+        msg.append(400)
+    elif pitch == "F#":
+        msg.append(410)
+    elif pitch == "G":
+        msg.append(420)
+    elif pitch == "G#":
+        msg.append(430)
+    elif pitch == "A":
+        msg.append(440)
+    elif pitch == "A#":
+        msg.append(450)
+    elif pitch == "B":
+        msg.append(460)
+    else:
+        msg.append(500)
+    
+    client.send(msg)
 
 #################################################### ALGORITHMS #################################################################
 
@@ -242,7 +278,7 @@ def dijkstra():
             winner = i
 
     node = queue.pop(winner)
-    play_music(node.music)
+    play_music(node.pitch)
 
     if not node.visited:
         for n in node.get_neighbours(grid):
@@ -305,20 +341,51 @@ def restart():
     text = fontBig.render(text_content, True, colors['red'])
     text_rect = text.get_rect()
     text_rect.center = dim*2//3, 50
-
-    order += 1
     to_restart = False
+
+def change_algorithm(n):
+    global algorithm, text, text_rect, order
+    algorithm, text_content = [
+        (a_star, 'A Star'),
+        (dijkstra, 'Dijkstra'),
+        (greedy_bfs, 'Greedy Best First Search'),
+        (dfs, 'Depth First Search'),
+        (bfs, 'Breadth First Search')
+    ][n % 5]
+
+    order = n
+
+    text = fontBig.render(text_content, True, colors['red'])
+    text_rect = text.get_rect()
+    text_rect.center = dim*2//3, 50
+
+def change_start(node):
+    global grid, start_node, queue
+    
+    node.state = NodeState.start
+    node.visited = True
+    start_node.state = NodeState.moveable
+    start_node.visited = False
+    start_node = node
+    queue = start_node.get_neighbours(grid)
+
+def change_finish(node):
+    global finish_node
+    
+    node.state = NodeState.finish
+    finish_node.state = NodeState.moveable
+    finish_node = node
 
 def check_finish(node):
     global simul_running
     global to_restart
 
     node.visited = True
-    play_music(node.music)
+    play_music(node.pitch)
     make_path(node)
 
     if node.state == NodeState.finish:
-        print('Found the finish node!!!')
+        print('Found the finish node')
         simul_running = False
         to_restart = True
 
@@ -335,7 +402,7 @@ while running:
         if len(queue) > 0:
             check_finish(algorithm())
         else:
-            print("Couldn't find the finish node :(")
+            print("Couldn't find the finish node")
             simul_running = False
             to_restart = True
 
@@ -344,6 +411,7 @@ while running:
             tile.draw(screen)
    
 
+    # Keybindings
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
@@ -351,15 +419,28 @@ while running:
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_SPACE:
                 simul_running = True
-            if event.key == pg.K_q:
-                wall_place = True
-                wall_remove = False
+            # Change draw mode
             if event.key == pg.K_a:
-                wall_remove = True
-                wall_place = False
+                draw_mode = DrawMode.wall_place
+            if event.key == pg.K_s:
+                draw_mode = DrawMode.wall_remove
+            if event.key == pg.K_d:
+                draw_mode = DrawMode.start_move
+            if event.key == pg.K_f:
+                draw_mode = DrawMode.finish_move
             if event.key == pg.K_ESCAPE:
-                wall_place = False
-                wall_remove = False
+                draw_mode = DrawMode.none
+            # Change algorithm
+            if event.key == pg.K_1:
+                change_algorithm(0)
+            if event.key == pg.K_2:
+                change_algorithm(1)
+            if event.key == pg.K_3:
+                change_algorithm(2)
+            if event.key == pg.K_4:
+                change_algorithm(3)
+            if event.key == pg.K_5:
+                change_algorithm(4)
 
         elif event.type == pg.MOUSEBUTTONDOWN and not simul_running:
             mouse_down = True
@@ -367,6 +448,7 @@ while running:
         elif event.type == pg.MOUSEBUTTONUP and not simul_running:
             mouse_down = False
             
+    # Place or remove walls
     if mouse_down:
         pos = pg.mouse.get_pos()
 
@@ -374,12 +456,17 @@ while running:
         j = int(pos[1] / dim * n_tiles)
 
         t = grid[i][j]
-        if wall_place and t.state == NodeState.moveable:
+
+        if draw_mode == DrawMode.wall_place and t.state == NodeState.moveable:
             t.state = NodeState.wall
-        elif wall_remove and NodeState.wall:
+        elif draw_mode == DrawMode.wall_remove and t.state == NodeState.wall:
             t.state = NodeState.moveable
+        elif draw_mode == DrawMode.start_move and t.state != NodeState.finish:
+            change_start(t)
+        elif draw_mode == DrawMode.finish_move and t.state != NodeState.start:
+            change_finish(t)
 
-
+    # Draw algorithm text
     screen.blit(text, text_rect)
     pg.display.update()
 

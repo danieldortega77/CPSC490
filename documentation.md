@@ -25,5 +25,10 @@ port:       57120
 
 log:
 
-2/19 Going through pygame tutorial (2 hours)
+2/19 (2 hours)
+Going through pygame tutorial
 https://www.youtube.com/watch?v=FfWpgLFMI7w
+
+2/21 (5 hours)
+Add modes for drawing and/or removing walls, start, and finish
+Play pitch in OSC according to note on the grid
