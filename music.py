@@ -13,17 +13,15 @@ pg.mixer.init()
 
 ############################################ PROGRAM VARIABLES ################################################
 
+# Set up OSC client
 client = pyOSC3.OSCClient()
 client.connect( ( '127.0.0.1', 57120 ) )
-# msg = pyOSC3.OSCMessage()
-# msg.setAddress("/test")
-# msg.append(440)
-# client.send(msg)
 
+# Flags
 running = True
-to_restart = False
-# TODO: change draw modes to enum
+run_speed = 10
 mouse_down = False
+to_restart = False
 
 class DrawMode(IntEnum):
     none = 0
@@ -34,7 +32,7 @@ class DrawMode(IntEnum):
 
 draw_mode = DrawMode.none
 
-dim = 600
+dim = 800
 n_tiles = 30
 tile_size = dim // n_tiles
 bg_color = colors['lightblue']
@@ -44,7 +42,8 @@ pg.display.set_caption('Pathfinding')
 
 fontBig = pg.font.Font('freesansbold.ttf', 32)
 fontSmall = pg.font.Font('freesansbold.ttf', 14)
-pitches = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+# pitches = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+pitches = ["C", "D", "E", "F", "G", "A", "B"]
 clock = pg.time.Clock()
 
 ##################################################################################################
@@ -69,6 +68,8 @@ class Node:
         self.timeSinceVisited = 0
         self.parent = None
         # self.pitch = choice(pitches)
+        # TODO Allow for customized pitch grids
+        # Temporarily select pitch by column
         self.pitch = pitches[i % len(pitches)]
 
         if random() < 0.2:
@@ -79,6 +80,7 @@ class Node:
     def draw(self, screen):
         rect_color = colors['white']
 
+        # Color the node correctly according to its state
         if self.in_path:
             rect_color = colors['yellow']
         elif self.state == NodeState.start:
@@ -99,15 +101,19 @@ class Node:
         elif self.state == NodeState.wall:
             rect_color = colors['black']
 
+        # Render white square for node
         rect(screen, rect_color, (self.pos[0] * tile_size,
                                   self.pos[1] * tile_size, tile_size, tile_size))
 
+        # Render node border
         rect(screen, bg_color, (self.pos[0] * tile_size,
                                 self.pos[1] * tile_size, tile_size, tile_size), 2)
         
+        # Render text
         if self.state == NodeState.moveable:                        
             pitchRender = fontSmall.render(self.pitch, True, colors['black'])
-            screen.blit(pitchRender, (self.pos[0] * tile_size + 5, self.pos[1] * tile_size + 3))
+            pitch_rect = pitchRender.get_rect(center=((self.pos[0] + 0.5) * tile_size, (self.pos[1] + 0.5) * tile_size))
+            screen.blit(pitchRender, pitch_rect)
         
         if self.visited:
             self.timeSinceVisited += 1
@@ -131,7 +137,7 @@ class Node:
             # [-1, -1, left]
         ]
 
-        for n, pos in enumerate(arr):
+        for _, pos in enumerate(arr):
             i = self.pos[0] + pos[0]
             j = self.pos[1] + pos[1]
 
@@ -161,36 +167,9 @@ def make_path(node):
 
 
 def play_music(pitch):
-    print(pitch)
     msg = pyOSC3.OSCMessage()
     msg.setAddress("/test")
-    if pitch == "C":
-        msg.append(350)
-    elif pitch == "C#":
-        msg.append(360)
-    elif pitch == "D":
-        msg.append(370)
-    elif pitch == "D#":
-        msg.append(380)
-    elif pitch == "E":
-        msg.append(390)
-    elif pitch == "F":
-        msg.append(400)
-    elif pitch == "F#":
-        msg.append(410)
-    elif pitch == "G":
-        msg.append(420)
-    elif pitch == "G#":
-        msg.append(430)
-    elif pitch == "A":
-        msg.append(440)
-    elif pitch == "A#":
-        msg.append(450)
-    elif pitch == "B":
-        msg.append(460)
-    else:
-        msg.append(500)
-    
+    msg.append(pitch)
     client.send(msg)
 
 #################################################### ALGORITHMS #################################################################
@@ -343,6 +322,7 @@ def restart():
     text_rect.center = dim*2//3, 50
     to_restart = False
 
+# Set the current algorithm to the nth in the list
 def change_algorithm(n):
     global algorithm, text, text_rect, order
     algorithm, text_content = [
@@ -359,6 +339,7 @@ def change_algorithm(n):
     text_rect = text.get_rect()
     text_rect.center = dim*2//3, 50
 
+# Set node to the current start node
 def change_start(node):
     global grid, start_node, queue
     
@@ -369,6 +350,7 @@ def change_start(node):
     start_node = node
     queue = start_node.get_neighbours(grid)
 
+# Set node to the current finish node
 def change_finish(node):
     global finish_node
     
@@ -376,6 +358,7 @@ def change_finish(node):
     finish_node.state = NodeState.moveable
     finish_node = node
 
+# Executes every time we visit a node and see if we have finished
 def check_finish(node):
     global simul_running
     global to_restart
@@ -394,7 +377,7 @@ def check_finish(node):
 restart()
 
 while running:
-    clock.tick(10)
+    clock.tick(run_speed)
 
     screen.fill(bg_color)
 
@@ -452,8 +435,10 @@ while running:
     if mouse_down:
         pos = pg.mouse.get_pos()
 
-        i = int(pos[0] / dim * n_tiles)
-        j = int(pos[1] / dim * n_tiles)
+        # i = int(pos[0] / dim * n_tiles)
+        i = int(pos[0] // tile_size)
+        # j = int(pos[1] / dim * n_tiles)
+        j = int(pos[1] // tile_size)
 
         t = grid[i][j]
 

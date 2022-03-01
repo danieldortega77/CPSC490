@@ -32,3 +32,15 @@ https://www.youtube.com/watch?v=FfWpgLFMI7w
 2/21 (5 hours)
 Add modes for drawing and/or removing walls, start, and finish
 Play pitch in OSC according to note on the grid
+
+2/26 (5 hours)
+Play correct pitch according to note
+Add visual indication that node was visited over time
+
+2/28 (5 hours)
+Add comments throughout code
+Make window scalable
+
+TODO:
+Add text info on the side (current algorithm, how to switch algorithms, draw mode, how to switch draw mode)
+Change color scheme

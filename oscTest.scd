@@ -13,8 +13,8 @@ h = Synth( \sin, [ \amp, 0.4 ] );
 x = OSCFunc( { | msg, time, addr, port |
     var pyFreq;
 	// [msg, time, addr, port].postln;
-	pyFreq = msg[1].asFloat;
+	pyFreq = msg[1].asString;
 	( "freq is " + pyFreq ).postln;
-	h.set( \freq, pyFreq );
-}, "/test" );
+	h.set( \freq, pyFreq.namecps );
+}, "/test", recvPort: 57120 );
 )
