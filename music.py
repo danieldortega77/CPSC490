@@ -22,6 +22,9 @@ running = True
 run_speed = 10
 mouse_down = False
 to_restart = False
+# pitches = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+pitches = ["C", "D", "E", "F", "G", "A", "B"]
+clock = pg.time.Clock()
 
 class DrawMode(IntEnum):
     none = 0
@@ -32,22 +35,32 @@ class DrawMode(IntEnum):
 
 draw_mode = DrawMode.none
 
-dim = 800
+dim = 600
 n_tiles = 30
 tile_size = dim // n_tiles
 bg_color = colors['lightblue']
 
-screen = pg.display.set_mode((dim, dim))
+# Set up screen
+screen = pg.display.set_mode((dim * 1.5, dim))
 pg.display.set_caption('Pathfinding')
 
 fontBig = pg.font.Font('freesansbold.ttf', 32)
 fontSmall = pg.font.Font('freesansbold.ttf', 14)
-# pitches = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-pitches = ["C", "D", "E", "F", "G", "A", "B"]
-clock = pg.time.Clock()
+
+# (a_star, 'A Star'),
+# (dijkstra, 'Dijkstra'),
+# (greedy_bfs, 'Greedy Best First Search'),
+# (dfs, 'Depth First Search'),
+# (bfs, 'Breadth First Search')
+algNames = ['A Star', 'Dijkstra', 'Greedy Best First Search', 'Depth First Search', 'Breadth First Search']
+numAlgs = len(algNames)
+algRenders = [None for _ in range(numAlgs)]
+algRects = [None for _ in range(numAlgs)]
+for i, alg in enumerate(algNames):
+    algRenders[i] = fontSmall.render(alg, True, colors['black'])
+    algRects[i] = rect(screen, colors['black'], (dim + 3.5 * tile_size, tile_size * (i + 1) * 2 + 2, dim / 2, dim))
 
 ##################################################################################################
-
 
 class NodeState(IntEnum):
     start = 0
@@ -452,7 +465,10 @@ while running:
             change_finish(t)
 
     # Draw algorithm text
-    screen.blit(text, text_rect)
+    # screen.blit(text, text_rect)
+    pg.draw.rect(screen, colors['red'], pg.Rect(dim + 2 * tile_size, (order + 1) * tile_size * 2, tile_size, tile_size))
+    for i in range(numAlgs):
+        screen.blit(algRenders[i], algRects[i])
     pg.display.update()
 
     if to_restart:
