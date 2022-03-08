@@ -35,7 +35,7 @@ class DrawMode(IntEnum):
 
 draw_mode = DrawMode.none
 
-dim = 600
+dim = 800
 n_tiles = 30
 tile_size = dim // n_tiles
 bg_color = colors['lightblue']
@@ -44,21 +44,31 @@ bg_color = colors['lightblue']
 screen = pg.display.set_mode((dim * 1.5, dim))
 pg.display.set_caption('Pathfinding')
 
-fontBig = pg.font.Font('freesansbold.ttf', 32)
+fontBig = pg.font.Font('freesansbold.ttf', 24)
+fontMedium = pg.font.Font('freesansbold.ttf', 20)
 fontSmall = pg.font.Font('freesansbold.ttf', 14)
 
-# (a_star, 'A Star'),
-# (dijkstra, 'Dijkstra'),
-# (greedy_bfs, 'Greedy Best First Search'),
-# (dfs, 'Depth First Search'),
-# (bfs, 'Breadth First Search')
+# Create text for current algorithm
+algLabel = fontBig.render('Current Algorithm:', True, colors['black'])
+algLabelRect = algLabel.get_rect(center=(dim * 1.25, dim/8))
 algNames = ['A Star', 'Dijkstra', 'Greedy Best First Search', 'Depth First Search', 'Breadth First Search']
 numAlgs = len(algNames)
 algRenders = [None for _ in range(numAlgs)]
 algRects = [None for _ in range(numAlgs)]
 for i, alg in enumerate(algNames):
-    algRenders[i] = fontSmall.render(alg, True, colors['black'])
-    algRects[i] = rect(screen, colors['black'], (dim + 3.5 * tile_size, tile_size * (i + 1) * 2 + 2, dim / 2, dim))
+    algRenders[i] = fontMedium.render(alg, True, colors['black'])
+    algRects[i] = algRenders[i].get_rect(center=(dim * 1.25, dim/4))
+
+# Create text for current draw mode
+drawModeLabel = fontBig.render('Current Draw Mode:', True, colors['black'])
+drawModeLabelRect = drawModeLabel.get_rect(center=(dim * 1.25, 3 * dim/8))
+drawModes = ['None', 'Place Walls', 'Erase Walls', 'Place Start', 'Place Finish']
+numDrawModes = len(drawModes)
+drawModeRenders = [None for _ in range(numDrawModes)]
+drawModeRects = [None for _ in range(numDrawModes)]
+for i, alg in enumerate(drawModes):
+    drawModeRenders[i] = fontMedium.render(alg, True, colors['black'])
+    drawModeRects[i] = drawModeRenders[i].get_rect(center=(dim * 1.25, dim/2))
 
 ##################################################################################################
 
@@ -84,6 +94,8 @@ class Node:
         # TODO Allow for customized pitch grids
         # Temporarily select pitch by column
         self.pitch = pitches[i % len(pitches)]
+        # Fuly random assignment
+        # self.pitch = pitches[int(random() * len(pitches))]
 
         if random() < 0.2:
             self.state = NodeState.wall
@@ -142,12 +154,6 @@ class Node:
             [1, 0],
             [0, 1],
             [0, -1],
-
-            # Uncomment to add diagonal neighbors
-            # [-1, 1, up],
-            # [1, 1, down],
-            # [1, -1, right],
-            # [-1, -1, left]
         ]
 
         for _, pos in enumerate(arr):
@@ -288,6 +294,7 @@ def dijkstra():
 
     return node
 
+algSymbols = [a_star, dijkstra, greedy_bfs, dfs, bfs]
 
 ################################################### ALGORITHM VARIABLES #########################################################
 
@@ -298,19 +305,35 @@ start_node,
 finish_node,
 queue,
 algorithm,
-text,
-text_rect,
-simul_running) = [None for _ in range(8)]
+simul_running) = [None for _ in range(6)]
 
 def restart():
+    global grid, start_node, finish_node, queue, algorithm, simul_running, order, to_restart
 
-    global grid, start_node, finish_node, queue, algorithm, simul_running, text, text_rect, order, to_restart
+    simul_running = False
 
-    if order == 0:
-        simul_running = False
-    else:
-        simul_running = True
-        time.sleep(.3)
+    for row in grid:
+        for node in row:
+            node.f = 0
+            node.g = 0
+            node.h = 0
+            node.visited = False
+            node.timeSinceVisited = 0
+            node.parent = None
+            node.in_path = False
+    
+    start_node.visited = True
+
+    queue = start_node.get_neighbours(grid)
+    algorithm = algSymbols[order % 5]
+
+    to_restart = False
+
+def restart_random():
+
+    global grid, start_node, finish_node, queue, algorithm, simul_running, order, to_restart
+
+    simul_running = False
 
     grid = [[Node(i, j) for j in range(n_tiles)] for i in range(n_tiles)]
 
@@ -322,35 +345,15 @@ def restart():
     start_node.visited = True
 
     queue = start_node.get_neighbours(grid)
-    algorithm, text_content = [
-        (a_star, 'A Star'),
-        (dijkstra, 'Dijkstra'),
-        (greedy_bfs, 'Greedy Best First Search'),
-        (dfs, 'Depth First Search'),
-        (bfs, 'Breadth First Search')
-    ][order % 5]
+    algorithm = algSymbols[order % 5]
 
-    text = fontBig.render(text_content, True, colors['red'])
-    text_rect = text.get_rect()
-    text_rect.center = dim*2//3, 50
     to_restart = False
 
 # Set the current algorithm to the nth in the list
 def change_algorithm(n):
-    global algorithm, text, text_rect, order
-    algorithm, text_content = [
-        (a_star, 'A Star'),
-        (dijkstra, 'Dijkstra'),
-        (greedy_bfs, 'Greedy Best First Search'),
-        (dfs, 'Depth First Search'),
-        (bfs, 'Breadth First Search')
-    ][n % 5]
-
+    global algorithm, order
+    algorithm = algSymbols[n % 5]
     order = n
-
-    text = fontBig.render(text_content, True, colors['red'])
-    text_rect = text.get_rect()
-    text_rect.center = dim*2//3, 50
 
 # Set node to the current start node
 def change_start(node):
@@ -387,7 +390,7 @@ def check_finish(node):
 
 ##################################################### MAIN LOOP #########################################################
     
-restart()
+restart_random()
 
 while running:
     clock.tick(run_speed)
@@ -427,16 +430,19 @@ while running:
             if event.key == pg.K_ESCAPE:
                 draw_mode = DrawMode.none
             # Change algorithm
-            if event.key == pg.K_1:
-                change_algorithm(0)
-            if event.key == pg.K_2:
-                change_algorithm(1)
-            if event.key == pg.K_3:
-                change_algorithm(2)
-            if event.key == pg.K_4:
-                change_algorithm(3)
-            if event.key == pg.K_5:
-                change_algorithm(4)
+            if not simul_running:
+                if event.key == pg.K_q:
+                    restart_random()
+                if event.key == pg.K_1:
+                    change_algorithm(0)
+                if event.key == pg.K_2:
+                    change_algorithm(1)
+                if event.key == pg.K_3:
+                    change_algorithm(2)
+                if event.key == pg.K_4:
+                    change_algorithm(3)
+                if event.key == pg.K_5:
+                    change_algorithm(4)
 
         elif event.type == pg.MOUSEBUTTONDOWN and not simul_running:
             mouse_down = True
@@ -452,23 +458,24 @@ while running:
         i = int(pos[0] // tile_size)
         # j = int(pos[1] / dim * n_tiles)
         j = int(pos[1] // tile_size)
+        
+        if i < n_tiles and j < n_tiles:
+            t = grid[i][j]
 
-        t = grid[i][j]
+            if draw_mode == DrawMode.wall_place and t.state == NodeState.moveable:
+                t.state = NodeState.wall
+            elif draw_mode == DrawMode.wall_remove and t.state == NodeState.wall:
+                t.state = NodeState.moveable
+            elif draw_mode == DrawMode.start_move and t.state != NodeState.finish:
+                change_start(t)
+            elif draw_mode == DrawMode.finish_move and t.state != NodeState.start:
+                change_finish(t)
 
-        if draw_mode == DrawMode.wall_place and t.state == NodeState.moveable:
-            t.state = NodeState.wall
-        elif draw_mode == DrawMode.wall_remove and t.state == NodeState.wall:
-            t.state = NodeState.moveable
-        elif draw_mode == DrawMode.start_move and t.state != NodeState.finish:
-            change_start(t)
-        elif draw_mode == DrawMode.finish_move and t.state != NodeState.start:
-            change_finish(t)
-
-    # Draw algorithm text
-    # screen.blit(text, text_rect)
-    pg.draw.rect(screen, colors['red'], pg.Rect(dim + 2 * tile_size, (order + 1) * tile_size * 2, tile_size, tile_size))
-    for i in range(numAlgs):
-        screen.blit(algRenders[i], algRects[i])
+    # Draw algorithm and draw mode text
+    screen.blit(algLabel, algLabelRect)
+    screen.blit(algRenders[order], algRects[order])
+    screen.blit(drawModeLabel, drawModeLabelRect)
+    screen.blit(drawModeRenders[draw_mode], drawModeRects[draw_mode])
     pg.display.update()
 
     if to_restart:

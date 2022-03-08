@@ -41,6 +41,17 @@ Add visual indication that node was visited over time
 Add comments throughout code
 Make window scalable
 
+3/6 (4 hours)
+Disallow changes while simulation is running
+Add text info on current algorithm and draw mode
+Made pluck sound instead of constant tone
+
+3/7 (4 hours)
+Stop continuous running (bug fix)
+Reset rather than have random grid after pathfinding finishes
+
 TODO:
-Add text info on the side (current algorithm, how to switch algorithms, draw mode, how to switch draw mode)
 Change color scheme
+Consolidate the text render into a separate function
+Window resizeable by dragging
+Instrumentation
