@@ -50,8 +50,12 @@ Made pluck sound instead of constant tone
 Stop continuous running (bug fix)
 Reset rather than have random grid after pathfinding finishes
 
-TODO:
-Change color scheme
+3/14 (4 hours)
+Add instrument switching
 Consolidate the text render into a separate function
-Window resizeable by dragging
+
+TODO:
+Change color scheme?
+Consolidate the text render into a separate function
+Editable text for each cell
 Instrumentation

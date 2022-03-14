@@ -48,27 +48,27 @@ fontBig = pg.font.Font('freesansbold.ttf', 24)
 fontMedium = pg.font.Font('freesansbold.ttf', 20)
 fontSmall = pg.font.Font('freesansbold.ttf', 14)
 
+def createText(text, center, font):
+    render = font.render(text, True, colors['black'])
+    rect = render.get_rect(center=center)
+    return render, rect
+
+def createTextList(text_list, center, font):
+    renders = [None for _ in range(len(text_list))]
+    rects = [None for _ in range(len(text_list))]
+    for i, text in enumerate(text_list):
+        renders[i], rects[i] = createText(text, center, font)
+    return renders, rects
+
 # Create text for current algorithm
-algLabel = fontBig.render('Current Algorithm:', True, colors['black'])
-algLabelRect = algLabel.get_rect(center=(dim * 1.25, dim/8))
+algLabel, algLabelRect = createText('Current Algorithm:', (dim * 1.25, dim/8), fontBig)
 algNames = ['A Star', 'Dijkstra', 'Greedy Best First Search', 'Depth First Search', 'Breadth First Search']
-numAlgs = len(algNames)
-algRenders = [None for _ in range(numAlgs)]
-algRects = [None for _ in range(numAlgs)]
-for i, alg in enumerate(algNames):
-    algRenders[i] = fontMedium.render(alg, True, colors['black'])
-    algRects[i] = algRenders[i].get_rect(center=(dim * 1.25, dim/4))
+algRenders, algRects = createTextList(algNames, (dim * 1.25, dim/4), fontMedium)
 
 # Create text for current draw mode
-drawModeLabel = fontBig.render('Current Draw Mode:', True, colors['black'])
-drawModeLabelRect = drawModeLabel.get_rect(center=(dim * 1.25, 3 * dim/8))
+drawModeLabel, drawModeLabelRect = createText('Current Draw Mode:', (dim * 1.25, 3 * dim/8), fontBig)
 drawModes = ['None', 'Place Walls', 'Erase Walls', 'Place Start', 'Place Finish']
-numDrawModes = len(drawModes)
-drawModeRenders = [None for _ in range(numDrawModes)]
-drawModeRects = [None for _ in range(numDrawModes)]
-for i, alg in enumerate(drawModes):
-    drawModeRenders[i] = fontMedium.render(alg, True, colors['black'])
-    drawModeRects[i] = drawModeRenders[i].get_rect(center=(dim * 1.25, dim/2))
+drawModeRenders, drawModeRects = createTextList(drawModes, (dim * 1.25, dim/2), fontMedium)
 
 ##################################################################################################
 
