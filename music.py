@@ -443,6 +443,16 @@ while running:
                     change_algorithm(3)
                 if event.key == pg.K_5:
                     change_algorithm(4)
+                if event.key == pg.K_p:
+                    msg = pyOSC3.OSCMessage()
+                    msg.setAddress("/test2")
+                    msg.append("instrument1")
+                    client.send(msg)
+                if event.key == pg.K_o:
+                    msg = pyOSC3.OSCMessage()
+                    msg.setAddress("/test3")
+                    msg.append("instrument2")
+                    client.send(msg)
 
         elif event.type == pg.MOUSEBUTTONDOWN and not simul_running:
             mouse_down = True
