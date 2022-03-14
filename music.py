@@ -32,6 +32,8 @@ class DrawMode(IntEnum):
     wall_remove = 2
     start_move = 3
     finish_move = 4
+    select = 5
+    deselect = 6
 
 draw_mode = DrawMode.none
 
@@ -67,7 +69,7 @@ algRenders, algRects = createTextList(algNames, (dim * 1.25, dim/4), fontMedium)
 
 # Create text for current draw mode
 drawModeLabel, drawModeLabelRect = createText('Current Draw Mode:', (dim * 1.25, 3 * dim/8), fontBig)
-drawModes = ['None', 'Place Walls', 'Erase Walls', 'Place Start', 'Place Finish']
+drawModes = ['None', 'Place Walls', 'Erase Walls', 'Place Start', 'Place Finish', 'Select', 'Deselect']
 drawModeRenders, drawModeRects = createTextList(drawModes, (dim * 1.25, dim/2), fontMedium)
 
 ##################################################################################################
@@ -90,6 +92,7 @@ class Node:
         self.visited = False
         self.timeSinceVisited = 0
         self.parent = None
+        self.selected = False
         # self.pitch = choice(pitches)
         # TODO Allow for customized pitch grids
         # Temporarily select pitch by column
@@ -106,12 +109,12 @@ class Node:
         rect_color = colors['white']
 
         # Color the node correctly according to its state
-        if self.in_path:
-            rect_color = colors['yellow']
-        elif self.state == NodeState.start:
+        if self.state == NodeState.start:
             rect_color = colors['lightgreen']
         elif self.state == NodeState.finish:
             rect_color = colors['coral']
+        elif self.in_path:
+            rect_color = colors['yellow']
         elif self.visited:
             if self.timeSinceVisited == 1:
                 rect_color = colors['lightpink']
@@ -125,6 +128,8 @@ class Node:
                 rect_color = colors['lightpink4']
         elif self.state == NodeState.wall:
             rect_color = colors['black']
+        elif self.selected:
+            rect_color = colors['lightblue1']
 
         # Render white square for node
         rect(screen, rect_color, (self.pos[0] * tile_size,
@@ -303,12 +308,13 @@ order = 0
 (grid,
 start_node,
 finish_node,
+selected_node,
 queue,
 algorithm,
-simul_running) = [None for _ in range(6)]
+simul_running) = [None for _ in range(7)]
 
 def restart():
-    global grid, start_node, finish_node, queue, algorithm, simul_running, order, to_restart
+    global grid, start_node, finish_node, selected_node, queue, algorithm, simul_running, order, to_restart
 
     simul_running = False
 
@@ -353,7 +359,7 @@ def restart_random():
 def change_algorithm(n):
     global algorithm, order
     algorithm = algSymbols[n % 5]
-    order = n
+    order = n % 5
 
 # Set node to the current start node
 def change_start(node):
@@ -373,6 +379,21 @@ def change_finish(node):
     node.state = NodeState.finish
     finish_node.state = NodeState.moveable
     finish_node = node
+
+def edit_selection(pitch):
+    global grid
+
+    for row in grid:
+        for tile in row:
+            if tile.selected:
+                tile.pitch = pitch
+
+def clear_selection():
+    global grid
+
+    for row in grid:
+        for tile in row:
+            tile.selected = False    
 
 # Executes every time we visit a node and see if we have finished
 def check_finish(node):
@@ -419,30 +440,44 @@ while running:
             if event.key == pg.K_SPACE:
                 simul_running = True
             # Change draw mode
-            if event.key == pg.K_a:
+            if event.key == pg.K_1:
                 draw_mode = DrawMode.wall_place
-            if event.key == pg.K_s:
+            if event.key == pg.K_2:
                 draw_mode = DrawMode.wall_remove
-            if event.key == pg.K_d:
+            if event.key == pg.K_3:
                 draw_mode = DrawMode.start_move
-            if event.key == pg.K_f:
+            if event.key == pg.K_4:
                 draw_mode = DrawMode.finish_move
-            if event.key == pg.K_ESCAPE:
+            if event.key == pg.K_5:
+                draw_mode = DrawMode.select
+            if event.key == pg.K_6:
+                draw_mode = DrawMode.deselect
+            if event.key == pg.K_0:
                 draw_mode = DrawMode.none
+            
             # Change algorithm
             if not simul_running:
-                if event.key == pg.K_q:
+                if draw_mode == DrawMode.select:
+                    if event.key == pg.K_a:
+                        edit_selection('A')
+                    if event.key == pg.K_b:
+                        edit_selection('B')
+                    if event.key == pg.K_c:
+                        edit_selection('C')
+                    if event.key == pg.K_d:
+                        edit_selection('D')
+                    if event.key == pg.K_e:
+                        edit_selection('E')
+                    if event.key == pg.K_f:
+                        edit_selection('F')
+                    if event.key == pg.K_g:
+                        edit_selection('G')
+                if event.key == pg.K_DELETE:
+                    clear_selection()
+                if event.key == pg.K_ESCAPE:
                     restart_random()
-                if event.key == pg.K_1:
-                    change_algorithm(0)
-                if event.key == pg.K_2:
-                    change_algorithm(1)
-                if event.key == pg.K_3:
-                    change_algorithm(2)
-                if event.key == pg.K_4:
-                    change_algorithm(3)
-                if event.key == pg.K_5:
-                    change_algorithm(4)
+                if event.key == pg.K_TAB:
+                    change_algorithm(order + 1)
                 if event.key == pg.K_p:
                     msg = pyOSC3.OSCMessage()
                     msg.setAddress("/test2")
@@ -460,7 +495,7 @@ while running:
         elif event.type == pg.MOUSEBUTTONUP and not simul_running:
             mouse_down = False
             
-    # Place or remove walls
+    # Draw mode functionality
     if mouse_down:
         pos = pg.mouse.get_pos()
 
@@ -480,6 +515,11 @@ while running:
                 change_start(t)
             elif draw_mode == DrawMode.finish_move and t.state != NodeState.start:
                 change_finish(t)
+            elif draw_mode == DrawMode.select:
+                t.selected = True
+            elif draw_mode == DrawMode.deselect:
+                t.selected = False
+
 
     # Draw algorithm and draw mode text
     screen.blit(algLabel, algLabelRect)

@@ -50,12 +50,19 @@ Made pluck sound instead of constant tone
 Stop continuous running (bug fix)
 Reset rather than have random grid after pathfinding finishes
 
-3/14 (4 hours)
+3/13 (5 hours)
 Add instrument switching
 Consolidate the text render into a separate function
+Change how algorithm is selected (cycle with Tab instead of individual keys for each)
+
+3/14 (5 hours)
+Add selection mode
+Add deselection mode
+Keybind to clear selection
+Type pitch for selected notes = *editable text for each cell!*
 
 TODO:
 Change color scheme?
-Consolidate the text render into a separate function
-Editable text for each cell
-Instrumentation
+Option to "increase" note for selection?
+Higher octaves
+Panning based on grid location? Or relation to start?
