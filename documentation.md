@@ -60,9 +60,9 @@ Add selection mode
 Add deselection mode
 Keybind to clear selection
 Type pitch for selected notes = *editable text for each cell!*
+Transpose up/down with arrow keys
 
 TODO:
 Change color scheme?
-Option to "increase" note for selection?
 Higher octaves
 Panning based on grid location? Or relation to start?

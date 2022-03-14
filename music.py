@@ -22,8 +22,8 @@ running = True
 run_speed = 10
 mouse_down = False
 to_restart = False
-# pitches = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-pitches = ["C", "D", "E", "F", "G", "A", "B"]
+pitches = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+# pitches = ["C", "D", "E", "F", "G", "A", "B"]
 clock = pg.time.Clock()
 
 class DrawMode(IntEnum):
@@ -96,7 +96,7 @@ class Node:
         # self.pitch = choice(pitches)
         # TODO Allow for customized pitch grids
         # Temporarily select pitch by column
-        self.pitch = pitches[i % len(pitches)]
+        self.pitch = i % len(pitches)
         # Fuly random assignment
         # self.pitch = pitches[int(random() * len(pitches))]
 
@@ -140,8 +140,8 @@ class Node:
                                 self.pos[1] * tile_size, tile_size, tile_size), 2)
         
         # Render text
-        if self.state == NodeState.moveable:                        
-            pitchRender = fontSmall.render(self.pitch, True, colors['black'])
+        if self.state == NodeState.moveable:
+            pitchRender = fontSmall.render(pitches[self.pitch], True, colors['black'])
             pitch_rect = pitchRender.get_rect(center=((self.pos[0] + 0.5) * tile_size, (self.pos[1] + 0.5) * tile_size))
             screen.blit(pitchRender, pitch_rect)
         
@@ -193,7 +193,7 @@ def make_path(node):
 def play_music(pitch):
     msg = pyOSC3.OSCMessage()
     msg.setAddress("/test")
-    msg.append(pitch)
+    msg.append(pitches[pitch])
     client.send(msg)
 
 #################################################### ALGORITHMS #################################################################
@@ -388,6 +388,15 @@ def edit_selection(pitch):
             if tile.selected:
                 tile.pitch = pitch
 
+def transpose_selection(n):
+    global grid
+
+    numPitches = len(pitches)
+    for row in grid:
+        for tile in row:
+            if tile.selected:
+                tile.pitch = (tile.pitch + n) % numPitches
+
 def clear_selection():
     global grid
 
@@ -459,19 +468,23 @@ while running:
             if not simul_running:
                 if draw_mode == DrawMode.select:
                     if event.key == pg.K_a:
-                        edit_selection('A')
+                        edit_selection(pitches.index('A'))
                     if event.key == pg.K_b:
-                        edit_selection('B')
+                        edit_selection(pitches.index('B'))
                     if event.key == pg.K_c:
-                        edit_selection('C')
+                        edit_selection(pitches.index('C'))
                     if event.key == pg.K_d:
-                        edit_selection('D')
+                        edit_selection(pitches.index('D'))
                     if event.key == pg.K_e:
-                        edit_selection('E')
+                        edit_selection(pitches.index('E'))
                     if event.key == pg.K_f:
-                        edit_selection('F')
+                        edit_selection(pitches.index('F'))
                     if event.key == pg.K_g:
-                        edit_selection('G')
+                        edit_selection(pitches.index('G'))
+                    if event.key == pg.K_UP:
+                        transpose_selection(1)
+                    if event.key == pg.K_DOWN:
+                        transpose_selection(-1)
                 if event.key == pg.K_DELETE:
                     clear_selection()
                 if event.key == pg.K_ESCAPE:
