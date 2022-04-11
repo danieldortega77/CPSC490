@@ -26,4 +26,5 @@ Daniel Ortega's senior project for CPSC 490
 ## Installing packages
 
 `python -m pip install pyOSC3`
+`python -m pip install pygame`
 
