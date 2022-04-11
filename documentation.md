@@ -1,82 +1,57 @@
-Setting up virtual environment:
+## Setting up virtual environment:
 py -m venv 490-venv
 (py, python, python3)
 
-Activating venv:
+## Activating venv:
 
-Windows:
+### Windows:
 490-venv\Scripts\activate.bat
 
-MacOS/Unix:
+### MacOS/Unix:
 source 490-venv/bin/activate
 
-Installing packages:
+## Installing packages:
 python -m pip install pyOSC3
 
-Deactivating venv:
+## Deactivating venv:
 deactivate
 
 
-OSC Message received by SC in format
+## OSC Message received by SC in format
 message:    [ /print, 440 ]
 time:       760.7525028
 address:    a NetAddr(127.0.0.1, 55935)
 port:       57120
 
-log:
+# Log
 
-2/19 (2 hours)
-Going through pygame tutorial
-https://www.youtube.com/watch?v=FfWpgLFMI7w
+| Date |  Time   | Log |
+| ---- | ------- | --- |
+| 2/19 | 2 hours | Going through pygame tutorial https://www.youtube.com/watch?v=FfWpgLFMI7w |
+| 2/21 | 5 hours | Add modes for drawing and/or removing walls, start, and finish. Play pitch in OSC according to note on the grid. |
+| 2/26 | 5 hours | Play correct pitch according to note. Add visual indication that node was visited over time. |
+| 2/28 | 5 hours | Add comments throughout code. Make window scalable. |
+| 3/6  | 4 hours | Disallow changes while simulation is running. Add text info on current algorithm and draw mode. Made pluck sound instead of constant tone |
+| 3/7  | 4 hours | Stop continuous running (bug fix). Reset rather than have random grid after pathfinding finishes. |
+| 3/13 | 5 hours | Add instrument switching. Consolidate the text render into a separate function. Change how algorithm is selected (cycle with Tab instead of individual keys for each). |
+| 3/14 | 5 hours | Add selection mode. Add deselection mode. Keybind to clear selection. Type pitch for selected notes = *editable text for each cell!* Transpose up/down with arrow keys. |
+| 3/19-3/27 | --- | Spring Break |
+| 4/4  | 6 hours | Add saving and loading functionality |
+| 4/5  | 6 hours | Add saving and loading functionality |
 
-2/21 (5 hours)
-Add modes for drawing and/or removing walls, start, and finish
-Play pitch in OSC according to note on the grid
-
-2/26 (5 hours)
-Play correct pitch according to note
-Add visual indication that node was visited over time
-
-2/28 (5 hours)
-Add comments throughout code
-Make window scalable
-
-3/6 (4 hours)
-Disallow changes while simulation is running
-Add text info on current algorithm and draw mode
-Made pluck sound instead of constant tone
-
-3/7 (4 hours)
-Stop continuous running (bug fix)
-Reset rather than have random grid after pathfinding finishes
-
-3/13 (5 hours)
-Add instrument switching
-Consolidate the text render into a separate function
-Change how algorithm is selected (cycle with Tab instead of individual keys for each)
-
-3/14 (5 hours)
-Add selection mode
-Add deselection mode
-Keybind to clear selection
-Type pitch for selected notes = *editable text for each cell!*
-Transpose up/down with arrow keys
-
-4/5
-Save/load!
-
-TODO:
-
+### What's Next
 1. Define methodology to achieve what sounds good
 2. Define what "sounds good"
 3. Screen record prior to meeting
-
-Clean up variable names
-Find out which grid setups are meaningful
-Different grid configurations
-Higher octaves
-
 Ideas:
 
-Change color scheme?
-Panning based on grid location? Or relation to start?
+### TODO
+1. Clean up variable names
+2. Find out which grid setups are meaningful
+3. Different grid configurations
+4. Higher octaves
+
+### Pending Ideas
+- Change color scheme
+- Panning based on grid location
+- Or panning based on relation to start?
