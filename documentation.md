@@ -62,7 +62,21 @@ Keybind to clear selection
 Type pitch for selected notes = *editable text for each cell!*
 Transpose up/down with arrow keys
 
+4/5
+Save/load!
+
 TODO:
-Change color scheme?
+
+1. Define methodology to achieve what sounds good
+2. Define what "sounds good"
+3. Screen record prior to meeting
+
+Clean up variable names
+Find out which grid setups are meaningful
+Different grid configurations
 Higher octaves
+
+Ideas:
+
+Change color scheme?
 Panning based on grid location? Or relation to start?

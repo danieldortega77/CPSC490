@@ -5,8 +5,10 @@ from pygame.draw import *
 
 from enum import IntEnum
 from random import random, randrange, choice
-import time
+import json
 import pyOSC3
+from tkinter import *
+from tkinter import filedialog
 
 pg.init()
 pg.mixer.init()
@@ -22,8 +24,8 @@ running = True
 run_speed = 10
 mouse_down = False
 to_restart = False
-pitches = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
-# pitches = ["C", "D", "E", "F", "G", "A", "B"]
+# pitches = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+pitches = ["C", "D", "E", "F", "G", "A", "B"]
 clock = pg.time.Clock()
 
 class DrawMode(IntEnum):
@@ -96,9 +98,11 @@ class Node:
         # self.pitch = choice(pitches)
         # TODO Allow for customized pitch grids
         # Temporarily select pitch by column
-        self.pitch = i % len(pitches)
+        # self.pitch = i % len(pitches)
         # Fuly random assignment
         # self.pitch = pitches[int(random() * len(pitches))]
+        # self.pitch = int(random() * len(pitches)) % len(pitches)
+        self.pitch = (i + j) % len(pitches)
 
         if random() < 0.2:
             self.state = NodeState.wall
@@ -313,6 +317,34 @@ queue,
 algorithm,
 simul_running) = [None for _ in range(7)]
 
+def load_grid(data):
+    global grid, start_node, finish_node, selected_node, queue, algorithm, simul_running, order, to_restart
+
+    simul_running = False
+
+    for i, row in enumerate(grid):
+        for j, node in enumerate(row):
+            nodeDict = data[i][j]
+            node.f = nodeDict["f"]
+            node.g = nodeDict["g"]
+            node.h = nodeDict["h"]
+            node.visited = nodeDict["visited"]
+            node.timeSinceVisited = nodeDict["timeSinceVisited"]
+            node.parent = nodeDict["parent"]
+            node.in_path = nodeDict["in_path"]
+            node.state = nodeDict["state"]
+            node.pitch = nodeDict["pitch"]
+
+            if node.state == NodeState.start:
+                start_node = node
+            elif node.state == NodeState.finish:
+                finish_node = node
+
+    queue = start_node.get_neighbours(grid)
+    algorithm = algSymbols[order % 5]
+
+    to_restart = False
+
 def restart():
     global grid, start_node, finish_node, selected_node, queue, algorithm, simul_running, order, to_restart
 
@@ -501,6 +533,15 @@ while running:
                     msg.setAddress("/test3")
                     msg.append("instrument2")
                     client.send(msg)
+                if event.key == pg.K_s:
+                    with open('saves/diagonal2.txt', 'w') as test:
+                        json.dump(json.dumps(grid, default=vars), test)
+                if event.key == pg.K_l:
+                    filepath = filedialog.askopenfilename(title="Load Grid", filetypes= (("text files","*.txt"),("all files","*.*")))
+                    with open(filepath, 'r') as test:
+                    # with open('saves/diagonal.txt', 'r') as test:
+                        data = json.loads(json.load(test))
+                        load_grid(data)
 
         elif event.type == pg.MOUSEBUTTONDOWN and not simul_running:
             mouse_down = True

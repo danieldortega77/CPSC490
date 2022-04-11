@@ -39,7 +39,7 @@ y = OSCFunc( { | msg, time, addr, port |
 z = OSCFunc( { | msg, time, addr, port |
     var ins;
 	ins = msg[1].asString;
-	( "ins is " + ins ).postln;
+	// ( "ins is " + ins ).postln;
 	j = h;
 }, "/test3", recvPort: 57120 );
 )
