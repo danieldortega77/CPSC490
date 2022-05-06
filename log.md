@@ -1,28 +1,3 @@
-## Setting up virtual environment:
-py -m venv 490-venv
-(py, python, python3)
-
-## Activating venv:
-
-### Windows:
-490-venv\Scripts\activate.bat
-
-### MacOS/Unix:
-source 490-venv/bin/activate
-
-## Installing packages:
-python -m pip install pyOSC3
-
-## Deactivating venv:
-deactivate
-
-
-## OSC Message received by SC in format
-message:    [ /print, 440 ]
-time:       760.7525028
-address:    a NetAddr(127.0.0.1, 55935)
-port:       57120
-
 # Log
 
 | Date |  Time   | Log |
@@ -42,24 +17,4 @@ port:       57120
 | 4/18 | 8 hours | Work on embedding chord progressions and higher level note patterns into the grid which vary on algorithm. |
 | 4/25 | 4 hours | Begin final report |
 | 4/26 | 3 hours | Continue work on final report |
-| 4/29-5/2 | 10 hours | Finish final report |
-
-### What's Next
-1. Define what "sounds good"
-- Things which could be a melody in a song
-- Likely diatonic
-- More fifths and fourths than other intervals
-2. Define methodology to achieve what sounds good 
-3. Screen record prior to meeting
-Ideas:
-
-### TODO
-1. Clean up variable names
-2. Find out which grid setups are meaningful
-3. Different grid configurations
-4. Higher octaves
-
-### Pending Ideas
-- Change color scheme
-- Panning based on grid location
-- Or panning based on relation to start?
+| 4/29-5/6 | 15 hours | Finish final report |

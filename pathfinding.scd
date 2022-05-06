@@ -1,6 +1,16 @@
-s.boot;
+/*******************************************************************************
+
+Daniel Ortega
+CPSC 490
+6 May 2022
+
+Final Project: Musical Pathfinding Algorithms
+
+*******************************************************************************/
 
 (
+
+s.waitForBoot({
 SynthDef( \sin, { | amp = 0.01, freq = 333, trig = 0 |
     var env, sig;
 	env = EnvGen.kr( Env.adsr(0.01, 0.1, 0), trig, doneAction: 0 );
@@ -26,14 +36,14 @@ x = OSCFunc( { | msg, time, addr, port |
 	( "freq is " + pyFreq ).postln;
 	j.set( \trig, 1, \freq, pyFreq.namecps );
 	j.set( \trig, 0, \freq, pyFreq.namecps );
-}, "/test", recvPort: 57120 );
+}, "/pathfinding", recvPort: 57120 );
 
 y = OSCFunc( { | msg, time, addr, port |
     var ins;
 	ins = msg[1].asString;
-	( "ins is " + ins ).postln;
+	// ( "ins is " + ins ).postln;
 	j = i;
-}, "/test2", recvPort: 57120 );
+}, "/instrument1", recvPort: 57120 );
 
 
 z = OSCFunc( { | msg, time, addr, port |
@@ -41,5 +51,8 @@ z = OSCFunc( { | msg, time, addr, port |
 	ins = msg[1].asString;
 	// ( "ins is " + ins ).postln;
 	j = h;
-}, "/test3", recvPort: 57120 );
+}, "/instrument2", recvPort: 57120 );
+
+})
+
 )

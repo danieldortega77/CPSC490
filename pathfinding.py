@@ -19,17 +19,23 @@ pg.mixer.init()
 # Set up OSC client
 client = pyOSC3.OSCClient()
 client.connect( ( '127.0.0.1', 57120 ) )
+clock = pg.time.Clock()
 
 # Flags
 running = True
 run_speed = 7
 mouse_down = False
 to_restart = False
+
+# Circle of fifths
 # pitches = ["F", "C", "G", "D", "A", "E", "B", "F#", "C#", "G#", "D#", "A#"]
 # pitches = ["F", "C", "G", "D", "A", "E", "B"]
+
+# Chromatic
 # pitches = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+# Diatonic
 pitches = ["C", "D", "E", "F", "G", "A", "B"]
-clock = pg.time.Clock()
 
 class DrawMode(IntEnum):
     none = 0
@@ -42,12 +48,12 @@ class DrawMode(IntEnum):
 
 draw_mode = DrawMode.none
 
+# Set up screen
 dim = 800
 n_tiles = 30
 tile_size = dim // n_tiles
 bg_color = colors['lightblue']
 
-# Set up screen
 screen = pg.display.set_mode((dim * 1.5, dim))
 pg.display.set_caption('Pathfinding')
 
@@ -98,21 +104,23 @@ class Node:
         self.timeSinceVisited = 0
         self.parent = None
         self.selected = False
-        # self.pitch = choice(pitches)
-        # TODO Allow for customized pitch grids
-        # Temporarily select pitch by column
-        # self.pitch = i % len(pitches)
-        # Fuly random assignment
+
+        # Fully random pitch assignment
         # self.pitch = pitches[int(random() * len(pitches))]
-        # self.pitch = int(random() * len(pitches)) % len(pitches)
-        # self.pitch = (i + j) % len(pitches)
+        # self.pitch = choice(pitches)
+
+        # Assign pitch by column
+        # self.pitch = i % len(pitches)
+
+        # Construct chords in the grid
         chord = ((i//6) + (j//6)) % len(pitches)
         self.pitch = (chord + (i % 3) * 2) % len(pitches)
-        # self.pitch = ((i//2) + (j//2)*4) % len(pitches)
-        # self.pitch = (((i) % 3) + (j // 3)) % len(pitches)
 
-        # if random() < 0.2:
-        if i % 6 == 5 or j % 6 == 5:
+        # Add rows and columns of walls
+        # if i % 6 == 5 or j % 6 == 5:
+
+        # Add completely random walls
+        if random() < 0.2:
             self.state = NodeState.wall
 
         self.in_path = False
@@ -204,7 +212,7 @@ def make_path(node):
 
 def play_music(pitch):
     msg = pyOSC3.OSCMessage()
-    msg.setAddress("/test")
+    msg.setAddress("/pathfinding")
     msg.append(pitches[pitch])
     client.send(msg)
 
@@ -420,6 +428,7 @@ def change_finish(node):
     finish_node.state = NodeState.moveable
     finish_node = node
 
+# Change selected nodes to pitch
 def edit_selection(pitch):
     global grid
 
@@ -428,6 +437,7 @@ def edit_selection(pitch):
             if tile.selected:
                 tile.pitch = pitch
 
+# Transpose selected nodes by n (integer value, negative is down)
 def transpose_selection(n):
     global grid
 
@@ -437,6 +447,7 @@ def transpose_selection(n):
             if tile.selected:
                 tile.pitch = (tile.pitch + n) % numPitches
 
+# Select no nodes
 def clear_selection():
     global grid
 
@@ -532,22 +543,23 @@ while running:
                     change_algorithm(order + 1)
                 if event.key == pg.K_p:
                     msg = pyOSC3.OSCMessage()
-                    msg.setAddress("/test2")
+                    msg.setAddress("/instrument1")
                     msg.append("instrument1")
                     client.send(msg)
                 if event.key == pg.K_o:
                     msg = pyOSC3.OSCMessage()
-                    msg.setAddress("/test3")
+                    msg.setAddress("/instrument2")
                     msg.append("instrument2")
                     client.send(msg)
+                # Save to file with date and time
                 if event.key == pg.K_s:
                     now = datetime.now().time()
-                    with open('saves/chords/' + str(now).replace(':', '.') + '.txt', 'w') as test:
+                    with open('saves/' + str(now).replace(':', '.') + '.txt', 'w') as test:
                         json.dump(json.dumps(grid, default=vars), test)
+                # Load from file
                 if event.key == pg.K_l:
                     filepath = filedialog.askopenfilename(title="Load Grid", filetypes= (("text files","*.txt"),("all files","*.*")))
                     with open(filepath, 'r') as test:
-                    # with open('saves/diagonal.txt', 'r') as test:
                         data = json.loads(json.load(test))
                         load_grid(data)
 
