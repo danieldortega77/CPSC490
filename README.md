@@ -1,6 +1,7 @@
 # CPSC490
 
 Daniel Ortega's senior project for CPSC 490
+*Insert Demo Video*
 
 ## Setting up Virtual Environment
 

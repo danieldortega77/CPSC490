@@ -4,6 +4,7 @@ from pygame.display import toggle_fullscreen
 from pygame.draw import *
 
 from enum import IntEnum
+from datetime import datetime
 from random import random, randrange, choice
 import json
 import pyOSC3
@@ -21,9 +22,11 @@ client.connect( ( '127.0.0.1', 57120 ) )
 
 # Flags
 running = True
-run_speed = 10
+run_speed = 7
 mouse_down = False
 to_restart = False
+# pitches = ["F", "C", "G", "D", "A", "E", "B", "F#", "C#", "G#", "D#", "A#"]
+# pitches = ["F", "C", "G", "D", "A", "E", "B"]
 # pitches = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 pitches = ["C", "D", "E", "F", "G", "A", "B"]
 clock = pg.time.Clock()
@@ -102,9 +105,14 @@ class Node:
         # Fuly random assignment
         # self.pitch = pitches[int(random() * len(pitches))]
         # self.pitch = int(random() * len(pitches)) % len(pitches)
-        self.pitch = (i + j) % len(pitches)
+        # self.pitch = (i + j) % len(pitches)
+        chord = ((i//6) + (j//6)) % len(pitches)
+        self.pitch = (chord + (i % 3) * 2) % len(pitches)
+        # self.pitch = ((i//2) + (j//2)*4) % len(pitches)
+        # self.pitch = (((i) % 3) + (j // 3)) % len(pitches)
 
-        if random() < 0.2:
+        # if random() < 0.2:
+        if i % 6 == 5 or j % 6 == 5:
             self.state = NodeState.wall
 
         self.in_path = False
@@ -470,7 +478,6 @@ while running:
     for row in grid:
         for tile in row:
             tile.draw(screen)
-   
 
     # Keybindings
     for event in pg.event.get():
@@ -534,7 +541,8 @@ while running:
                     msg.append("instrument2")
                     client.send(msg)
                 if event.key == pg.K_s:
-                    with open('saves/diagonal2.txt', 'w') as test:
+                    now = datetime.now().time()
+                    with open('saves/chords/' + str(now).replace(':', '.') + '.txt', 'w') as test:
                         json.dump(json.dumps(grid, default=vars), test)
                 if event.key == pg.K_l:
                     filepath = filedialog.askopenfilename(title="Load Grid", filetypes= (("text files","*.txt"),("all files","*.*")))
