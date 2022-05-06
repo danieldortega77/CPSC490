@@ -4,6 +4,18 @@ Daniel Ortega's senior project for CPSC 490.
 
 For a video of how to run the program, what it looks like in action, and a tutorial of the keybinds, see Video_Demo.mp4 in this repository. (Note: the sound output lags behind the pathfinding program due to my computer struggling to run the recording software.)
 
+# Repository Contents
+
+- 490-venv:         virtual environment files
+- saves:            saved grid configurations
+- zoo-submission:   files submitted to the Zoo, including PDFs of the project proposal and final report
+- LICENSE:          MIT license
+- log.md:           log of features implemented and time spent on this project
+- pathfinding.py:   1/2 main files which run the program: UI and logic
+- pathfinding.scd:  2/2 main files which run the program: sound output
+- README.md:        this markdown file
+- Video_Demo.mp4:   narrated demonstration of how to run the program
+
 # Steps to Run Program
 
 ## 0. Install SuperCollider
