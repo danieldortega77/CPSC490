@@ -11,6 +11,7 @@ Final Project: Musical Pathfinding Algorithms
 (
 
 s.waitForBoot({
+
 SynthDef( \sin, { | amp = 0.01, freq = 333, trig = 0 |
     var env, sig;
 	env = EnvGen.kr( Env.adsr(0.01, 0.1, 0), trig, doneAction: 0 );
@@ -25,9 +26,13 @@ SynthDef( \tri, { | amp = 0.01, freq = 333, trig = 0 |
     Out.ar( [ 0 ], sig * 0.6 );
 }).add;
 
+s.sync;
+
 h = Synth( \sin, [ \amp, 0.4 ] );
 i = Synth( \tri, [ \amp, 0.4 ] );
 j = h;
+
+s.sync;
 
 x = OSCFunc( { | msg, time, addr, port |
     var pyFreq;
@@ -44,7 +49,6 @@ y = OSCFunc( { | msg, time, addr, port |
 	// ( "ins is " + ins ).postln;
 	j = i;
 }, "/instrument1", recvPort: 57120 );
-
 
 z = OSCFunc( { | msg, time, addr, port |
     var ins;
