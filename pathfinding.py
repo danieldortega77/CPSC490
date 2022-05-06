@@ -28,6 +28,7 @@ mouse_down = False
 to_restart = False
 
 # Circle of fifths
+# Use these for "fifths" save files
 # pitches = ["F", "C", "G", "D", "A", "E", "B", "F#", "C#", "G#", "D#", "A#"]
 # pitches = ["F", "C", "G", "D", "A", "E", "B"]
 
@@ -35,6 +36,7 @@ to_restart = False
 # pitches = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
 # Diatonic
+# Use this for "chords" and "diagonal" save files
 pitches = ["C", "D", "E", "F", "G", "A", "B"]
 
 class DrawMode(IntEnum):

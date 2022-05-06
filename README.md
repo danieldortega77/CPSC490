@@ -2,7 +2,7 @@
 
 Daniel Ortega's senior project for CPSC 490.
 
-*Insert Demo Video*
+For a video of how to run the program, what it looks like in action, and a tutorial of the keybinds, see Video_Demo.mp4 in this repository. (Note: the sound output lags behind the pathfinding program due to my computer struggling to run the recording software.)
 
 # Steps to Run Program
 
@@ -73,9 +73,11 @@ Run `pathfinding.py` in the terminal. This could be via `pathfinding.py`, `py pa
 
 ## 1. Close pygame window
 
+Click the red X in the corner.
+
 ## 2.  Quit server in SuperCollider 
 
-Press `crtl` + `.`
+With the SuperCollider IDE open, press `crtl` + `.`
 
 ## 3. Dectivate venv
 
